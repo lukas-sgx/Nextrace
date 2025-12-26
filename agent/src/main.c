@@ -9,6 +9,6 @@
 
 int main(int argc, char **argv)
 {
-    write_agent(1, "Nextrace Agent Started\n", 23);
+    write(1, "Nextrace Agent Started\n", 23);
     return 0;
 }
