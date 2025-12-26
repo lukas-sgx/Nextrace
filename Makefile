@@ -5,9 +5,10 @@
 ## Makefile
 ##
 
-CC = clang
+CC = epiclang
 
-SRC-AGENT = agent/src/main.c 
+SRC-AGENT = agent/src/main.c \
+	agent/src/connection.c \
 
 SRC-ASM = agent/asm/syscalls.S
 
