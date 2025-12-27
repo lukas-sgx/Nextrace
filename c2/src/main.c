@@ -9,7 +9,7 @@
 #include "cli.h"
 #include <pthread.h>
 
-int main(int argc, char **argv)
+int main(void)
 {
     server(8080);
     return 0;

@@ -14,7 +14,9 @@ SRC-ASM = agent/asm/syscalls.S
 
 SRC-C2 = c2/src/cli.c \
 		  c2/src/server.c \
-		  c2/src/main.c
+		  c2/src/main.c \
+		  c2/src/clean.c \
+		  c2/src/seed.c
 
 OBJC2 = $(SRC-C2:.c=.o)
 

@@ -11,7 +11,12 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <stdlib.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <string.h>
 #include "cli.h"
+#include "server.h"
 
 int create_socket(void)
 {
@@ -36,44 +41,91 @@ static void launch_server(int server_fd, struct sockaddr_in *address, int port)
     address->sin_addr.s_addr = INADDR_ANY;
     address->sin_port = htons(port);
     bind(server_fd, (struct sockaddr *)address, sizeof(*address));
-    listen(server_fd, 3);
+    listen(server_fd, 10);
     set_timeout(server_fd, 0);
+}
+
+static int close_client(client_args_t *client_args, int ret)
+{
+    if (ret == 0) {
+        printf("\n" BLUE "[-] " RESET "Session ended " RESET "\n");
+        write(1, "nex> ", 5);
+        delete_client_by_port(client_args->clients,
+            client_args->port, client_args->address);
+        return 0;
+    }
+    if (ret < 0) {
+        sleep(1);
+        if (errno == EAGAIN || errno == EWOULDBLOCK)
+            return 1;
+        printf("\n[NEXTRACE] Connection lost (Error)\n");
+        write(1, "nex> ", 5);
+        return 0;
+    }
+    return 2;
 }
 
 void *connect_client(void *arg)
 {
-    int new_socket = *(int *)arg;
+    client_args_t *client_args = (client_args_t *)arg;
+    int new_socket = *(client_args->pclient);
+    char buffer[1024];
+    int ret = 0;
 
-    printf("[NEXTRACE] New connection accepted (socket fd: %d)\n", new_socket);
-    close(new_socket);
-    write(1, "nex > ", 6);
-    printf("[NEXTRACE] Connection closed (socket fd: %d)\n", new_socket);
-    write(1, "nex > ", 6);
+    printf("\n" RED "[+] " RESET "Session started " RESET "\n");
+    write(1, "nex> ", 5);
+    while (TRUE) {
+        ret = recv(new_socket, buffer, sizeof(buffer), MSG_DONTWAIT);
+        if (close_client(client_args, ret) == 0)
+            break;
+        sleep(1);
+    }
+    if (new_socket != -1)
+        close(new_socket);
     return NULL;
 }
 
-void cli_handler(int *server_fd, int port)
+static void cli_handler(int port, server_t *server)
 {
     pthread_t cli_thread;
 
-    printf("[NEXTRACE] Service started on port %d\n", port);
-    pthread_create(&cli_thread, NULL, (void *)cli, (void *)server_fd);
+    printf(BLUE"[*] " RESET "Deploy on port %d\n\n", port);
+    pthread_create(&cli_thread, NULL, (void *)cli, server);
     pthread_detach(cli_thread);
 }
 
-void connection_handler(int *server_fd, struct sockaddr_in *address)
+static void client_handler(int *client_socket,
+    node_client_t **clients,
+    int port, char *address)
 {
+    client_args_t *args = malloc(sizeof(client_args_t));
     pthread_t tid;
+
+    args->clients = clients;
+    args->pclient = malloc(sizeof(int));
+    *(args->pclient) = *client_socket;
+    args->port = port;
+    args->address = address;
+    pthread_create(&tid, NULL, (void *)connect_client, args);
+    pthread_detach(tid);
+}
+
+void connection_handler(int *server_fd, struct sockaddr_in *address,
+    node_client_t **clients)
+{
     int client = 0;
     socklen_t addrlen = sizeof(*address);
+    client_t *new_client = NULL;
 
     while (*server_fd != -1) {
         addrlen = sizeof(*address);
         client = accept(*server_fd, (struct sockaddr *)address, &addrlen);
         if (client < 0)
             continue;
-        pthread_create(&tid, NULL, (void *)connect_client, &client);
-        pthread_detach(tid);
+        seed_client(client, address, &new_client);
+        push_client(clients, new_client);
+        client_handler(&client, clients, new_client->port,
+            new_client->ip_address);
     }
 }
 
@@ -81,10 +133,16 @@ int server(int port)
 {
     int server_fd = create_socket();
     struct sockaddr_in address;
+    server_t *server = malloc(sizeof(server_t));
 
+    server->server_fd = &server_fd;
+    server->clients = NULL;
     launch_server(server_fd, &address, port);
-    cli_handler(&server_fd, port);
-    connection_handler(&server_fd, &address);
-    close(server_fd);
+    cli_handler(port, server);
+    connection_handler(server->server_fd, &address, &server->clients);
+    delete_all_clients(server->clients);
+    if (server_fd != -1)
+        close(server_fd);
+    free(server);
     return 0;
 }
