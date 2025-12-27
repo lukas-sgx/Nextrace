@@ -10,5 +10,6 @@
 
     #include <stddef.h>
 
-    size_t write(unsigned int fd, const char *buf, size_t size);
+size_t write(unsigned int fd, const char *buf, size_t size);
+
 #endif /* SYSCALLS_H_ */

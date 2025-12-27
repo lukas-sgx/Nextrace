@@ -6,9 +6,10 @@
 */
 
 #include "syscalls.h"
+#include "connection.h"
 
-int main(int argc, char **argv)
+int main(void)
 {
-    write(1, "Nextrace Agent Started\n", 23);
+    establish_connection("127.0.0.1", 8080);
     return 0;
 }
