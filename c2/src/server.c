@@ -41,7 +41,8 @@ static void launch_server(int server_fd, struct sockaddr_in *address, int port)
     address->sin_addr.s_addr = INADDR_ANY;
     address->sin_port = htons(port);
     bind(server_fd, (struct sockaddr *)address, sizeof(*address));
-    listen(server_fd, 10);
+    if (listen(server_fd, 10) == -1)
+        exit(1);
     set_timeout(server_fd, 0);
 }
 
@@ -82,6 +83,8 @@ void *connect_client(void *arg)
     }
     if (new_socket != -1)
         close(new_socket);
+    free(client_args->pclient);
+    free(client_args);
     return NULL;
 }
 
@@ -96,36 +99,37 @@ static void cli_handler(int port, server_t *server)
 
 static void client_handler(int *client_socket,
     node_client_t **clients,
-    int port, char *address)
+    client_args_t *args)
 {
-    client_args_t *args = malloc(sizeof(client_args_t));
     pthread_t tid;
 
     args->clients = clients;
     args->pclient = malloc(sizeof(int));
     *(args->pclient) = *client_socket;
-    args->port = port;
-    args->address = address;
     pthread_create(&tid, NULL, (void *)connect_client, args);
     pthread_detach(tid);
 }
 
 void connection_handler(int *server_fd, struct sockaddr_in *address,
-    node_client_t **clients)
+    node_client_t **clients, int *unique_id)
 {
     int client = 0;
     socklen_t addrlen = sizeof(*address);
     client_t *new_client = NULL;
+    client_args_t *args = NULL;
 
     while (*server_fd != -1) {
         addrlen = sizeof(*address);
         client = accept(*server_fd, (struct sockaddr *)address, &addrlen);
         if (client < 0)
             continue;
-        seed_client(client, address, &new_client);
+        seed_client(client, address, &new_client, unique_id);
         push_client(clients, new_client);
-        client_handler(&client, clients, new_client->port,
-            new_client->ip_address);
+        args = malloc(sizeof(client_args_t));
+        args->port = new_client->port;
+        args->address = new_client->ip_address;
+        args->unique_id = *unique_id;
+        client_handler(&client, clients, args);
     }
 }
 
@@ -134,12 +138,14 @@ int server(int port)
     int server_fd = create_socket();
     struct sockaddr_in address;
     server_t *server = malloc(sizeof(server_t));
+    int unique_id = 0;
 
     server->server_fd = &server_fd;
     server->clients = NULL;
     launch_server(server_fd, &address, port);
     cli_handler(port, server);
-    connection_handler(server->server_fd, &address, &server->clients);
+    connection_handler(server->server_fd, &address, &server->clients,
+        &unique_id);
     delete_all_clients(server->clients);
     if (server_fd != -1)
         close(server_fd);

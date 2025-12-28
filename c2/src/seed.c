@@ -20,10 +20,12 @@ void push_client(node_client_t **head, client_t *new_client)
 }
 
 void seed_client(int client, struct sockaddr_in *address,
-    client_t **new_client)
+    client_t **new_client, int *unique_id)
 {
     *new_client = malloc(sizeof(client_t));
     (*new_client)->socket_fd = client;
     (*new_client)->ip_address = strdup(inet_ntoa(address->sin_addr));
     (*new_client)->port = ntohs(address->sin_port);
+    (*new_client)->id = *unique_id;
+    (*unique_id)++;
 }

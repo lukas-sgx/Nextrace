@@ -11,20 +11,20 @@
 int display_clients(node_client_t **clients)
 {
     node_client_t *current = *clients;
-    int count = 0;
 
     printf("Active sessions\n===============\n\n");
     if (current != NULL)
         printf("ID:\tIP Address\t\n");
+    else {
+        printf("No active sessions\n");
+        return 0;
+    }
     while (current != NULL) {
-        printf("%d\t%s:%d\n", count + 1,
+        printf("%d\t%s:%d\n", current->client->id,
             current->client->ip_address, current->client->port);
         current = current->next;
-        count++;
     }
-    if (count == 0)
-        printf("No active sessions\n");
-    return count;
+    return 0;
 }
 
 int help_command(void)

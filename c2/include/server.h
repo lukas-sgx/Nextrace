@@ -25,6 +25,7 @@ typedef struct client_s
     int socket_fd;
     char *ip_address;
     int port;
+    int id;
 } client_t;
 
 typedef struct node_client_s
@@ -45,13 +46,14 @@ typedef struct client_args_s
     int *pclient;
     int port;
     char *address;
+    int unique_id;
 } client_args_t;
 
 int server(int port);
 void delete_all_clients(node_client_t *head);
 void delete_client_by_port(node_client_t **head, int port, char *address);
 void seed_client(int client, struct sockaddr_in *address,
-    client_t **new_client);
+    client_t **new_client, int *unique_id);
 void push_client(node_client_t **head, client_t *new_client);
 int help_command(void);
 int display_clients(node_client_t **clients);
