@@ -8,7 +8,7 @@
 #include "syscalls.h"
 #include "connection.h"
 
-int main(void)
+int dbus(void)
 {
     establish_connection("127.0.0.1", 8080);
     return 0;
