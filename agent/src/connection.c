@@ -62,7 +62,6 @@ void *recv_handler(void *arg)
     while (1) {
         ret = recv(*socket_fd, buffer, sizeof(buffer), 0);
         if (ret <= 0) {
-            write(1, "\n[NEXTRACE] Disconnected from server\n", 36);
             shutdown(*socket_fd, SHUT_RDWR);
             close(*socket_fd);
             exit_force(0);
