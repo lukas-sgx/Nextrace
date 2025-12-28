@@ -12,33 +12,12 @@
 #include <sys/socket.h>
 #include "server.h"
 
-int display_clients(node_client_t **clients)
-{
-    node_client_t *current = *clients;
-    int count = 0;
-
-    printf("Active sessions\n===============\n\n");
-    if (current != NULL)
-        printf("ID:\tIP Address\t\n");
-    while (current != NULL) {
-        printf("%d\t%s:%d\n", count + 1,
-            current->client->ip_address, current->client->port);
-        current = current->next;
-        count++;
-    }
-    if (count == 0)
-        printf("No active sessions\n");
-    return count;
-}
-
 int handle_command(char *input, node_client_t **clients)
 {
     if (strncmp(input, "exit", 4) == 0)
         return 1;
     if (strncmp(input, "help", 4) == 0) {
-        printf("Available commands:\n");
-        printf("help - Show this help message\n");
-        printf("exit - Terminate the server\n");
+        help_command();
         return 0;
     }
     if (strncmp(input, "\n", 1) == 0)

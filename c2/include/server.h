@@ -53,6 +53,7 @@ void delete_client_by_port(node_client_t **head, int port, char *address);
 void seed_client(int client, struct sockaddr_in *address,
     client_t **new_client);
 void push_client(node_client_t **head, client_t *new_client);
-
+int help_command(void);
+int display_clients(node_client_t **clients);
 
 #endif /* SERVER_H_ */
