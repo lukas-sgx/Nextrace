@@ -10,4 +10,6 @@
 
 void establish_connection(char *ip_address, int port);
 
+extern int exit_force(int error_code);
+
 #endif /* CONNECTION_H_ */

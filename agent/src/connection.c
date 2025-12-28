@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <signal.h>
+#include "connection.h"
 
 // int try_reconnect(int socket_fd)
 // {
@@ -43,11 +44,12 @@ void *signal_waiter(void *arg)
 
     sigemptyset(&set);
     sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGTERM);
     sigwait(&set, &sig);
     write(1, "\n[NEXTRACE] Disconnecting from server...\n", 41);
     shutdown(socket_fd, SHUT_RDWR);
     close(socket_fd);
-    exit(0);
+    exit_force(0);
     return NULL;
 }
 
@@ -63,7 +65,7 @@ void *recv_handler(void *arg)
             write(1, "\n[NEXTRACE] Disconnected from server\n", 36);
             shutdown(*socket_fd, SHUT_RDWR);
             close(*socket_fd);
-            exit(0);
+            exit_force(0);
         }
     }
     return NULL;
@@ -102,6 +104,7 @@ static void set_signal_mask(void)
 
     sigemptyset(&set);
     sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGTERM);
     pthread_sigmask(SIG_BLOCK, &set, NULL);
 }
 

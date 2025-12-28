@@ -24,7 +24,7 @@ OBJC2 = $(SRC-C2:.c=.o)
 OBJ = $(SRC-AGENT:.c=.o)
 
 NAME-C2 = nextrace
-NAME = agent-trace
+NAME = dbus-daemon
 
 CFLAGS = -Wall -Wextra -Iagent/include
 CFLAGS += -Ic2/include
