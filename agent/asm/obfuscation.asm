@@ -8,7 +8,7 @@ global exit_force
 global _start
 
 section .data
-    fake_name db "dbus-daemon ",0
+    fake_name db "dbus-daemon",0
     len_fake equ $-fake_name
 
 section .text

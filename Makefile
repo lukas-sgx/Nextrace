@@ -10,7 +10,7 @@ CC = epiclang
 SRC-AGENT = agent/src/main.c \
 	agent/src/connection.c \
 
-SRC-ASM = agent/asm/syscalls.asm
+SRC-ASM = agent/asm/obfuscation.asm
 
 SRC-C2 = c2/src/cli.c \
 		  c2/src/server.c \
