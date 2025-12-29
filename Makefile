@@ -17,7 +17,8 @@ SRC-C2 = c2/src/cli.c \
 		  c2/src/main.c \
 		  c2/src/clean.c \
 		  c2/src/seed.c\
-		  c2/src/commands.c
+		  c2/src/commands.c \
+		  c2/src/sessions.c
 
 OBJC2 = $(SRC-C2:.c=.o)
 
