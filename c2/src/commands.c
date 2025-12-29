@@ -6,6 +6,8 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "server.h"
 
 int display_clients(node_client_t **clients)
@@ -25,6 +27,40 @@ int display_clients(node_client_t **clients)
         current = current->next;
     }
     return 0;
+}
+
+int found_kill_client(int id, node_client_t **clients,
+    node_client_t *current, node_client_t *previous)
+{
+    if (current->client->id == id) {
+        if (previous == NULL)
+            *clients = current->next;
+        else
+            previous->next = current->next;
+        if (current->client->socket_fd != -1) {
+            shutdown(current->client->socket_fd, SHUT_RDWR);
+            close(current->client->socket_fd);
+        }
+        free(current->client);
+        free(current);
+        printf(BLUE "[-] " RESET "Session %d terminated successfully\n", id);
+        return 0;
+    }
+    previous = current;
+    current = current->next;
+    return 0;
+}
+
+int kill_session(int id, node_client_t **clients)
+{
+    node_client_t *current = *clients;
+    node_client_t *previous = NULL;
+
+    while (current != NULL)
+        if (found_kill_client(id, clients, current, previous) == 0)
+            return 0;
+    printf("Session with ID %d not found\n", id);
+    return -1;
 }
 
 int help_command(void)

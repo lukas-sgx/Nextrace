@@ -57,5 +57,6 @@ void seed_client(int client, struct sockaddr_in *address,
 void push_client(node_client_t **head, client_t *new_client);
 int help_command(void);
 int display_clients(node_client_t **clients);
-
+int sessions_handler(char *input, node_client_t **clients);
+int kill_session(int id, node_client_t **clients);
 #endif /* SERVER_H_ */

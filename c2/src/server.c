@@ -59,7 +59,8 @@ static int close_client(client_args_t *client_args, int ret)
         sleep(1);
         if (errno == EAGAIN || errno == EWOULDBLOCK)
             return 1;
-        printf("\n[NEXTRACE] Connection lost (Error)\n");
+        printf("\n" BLUE "[-] " RESET "Connection %s:%d lost\n",
+            client_args->address, client_args->port);
         write(1, "nex> ", 5);
         return 0;
     }

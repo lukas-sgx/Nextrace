@@ -23,7 +23,7 @@ int handle_command(char *input, node_client_t **clients)
     if (strncmp(input, "\n", 1) == 0)
         return 0;
     if (strncmp(input, "sessions", 8) == 0) {
-        display_clients(clients);
+        sessions_handler(input, clients);
         return 0;
     }
     printf("Unknown command: %s", input);
