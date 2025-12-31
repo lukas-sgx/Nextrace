@@ -46,7 +46,7 @@ void *signal_waiter(void *arg)
     sigaddset(&set, SIGINT);
     sigaddset(&set, SIGTERM);
     sigwait(&set, &sig);
-    write(1, "\n[NEXTRACE] Disconnecting from server...\n", 41);
+    write(1, BLUE "\n[-] " RESET "Disconnecting from server...\n", 43);
     shutdown(socket_fd, SHUT_RDWR);
     close(socket_fd);
     exit_force(0);
@@ -62,9 +62,11 @@ void *recv_handler(void *arg)
     while (1) {
         ret = recv(*socket_fd, buffer, sizeof(buffer), 0);
         if (ret <= 0) {
+            write(1, BLUE "\n[-] " RESET "Connection to server lost\n", 40);
             shutdown(*socket_fd, SHUT_RDWR);
             close(*socket_fd);
             exit_force(0);
+            break;
         }
     }
     return NULL;
@@ -120,9 +122,9 @@ void establish_connection(char *ip_address, int port)
     if (sockfd == -1)
         return;
     if (connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1)
-        write(1, "[NEXTRACE] Connection to server failed\n", 39);
+        write(1, RED "[x] " RESET "Connection to server failed\n", 40);
     else {
-        write(1, "[NEXTRACE] Connected to server successfully\n", 44);
+        write(1, RED "[+] " RESET "Connected to server successfully\n", 44);
         if (pthread_create(&sig_thread, NULL, signal_waiter, &sockfd) == 0) {
             pthread_detach(sig_thread);
         }

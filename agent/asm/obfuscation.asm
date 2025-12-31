@@ -73,13 +73,13 @@ trace_redirect:
     syscall
 
 no_debug:
-    mov     rdi, dbus
-    mov     rsi, r12
-    mov     rdx, r13
-    xor     rcx, rcx
-    xor     r8,  r8
-    mov     r9,  r14
-    mov     rax, rsp
+    mov  rdi, dbus
+    mov  rsi, r12
+    mov  rdx, r13
+    xor  rcx, rcx
+    xor  r8, r8
+    mov  r9,r14
+    mov  rax, rsp
     push rax
 
     call __libc_start_main wrt ..plt
